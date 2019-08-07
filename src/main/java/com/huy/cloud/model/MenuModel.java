@@ -1,4 +1,4 @@
-package com.huy.cloud.web.vm;
+package com.huy.cloud.model;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -13,8 +13,9 @@ public class MenuModel implements Serializable {
     private String iconPath;
     private String description;
     private BigDecimal price;
+    private BigDecimal vipPrice;
     private List<String> detailImagePaths;
-    private int stars;
+    private int appraise;
 
     public String getId() {
         return id;
@@ -56,6 +57,14 @@ public class MenuModel implements Serializable {
         this.price = price;
     }
 
+    public BigDecimal getVipPrice() {
+        return vipPrice;
+    }
+
+    public void setVipPrice(BigDecimal vipPrice) {
+        this.vipPrice = vipPrice;
+    }
+
     public List<String> getDetailImagePaths() {
         return detailImagePaths;
     }
@@ -64,11 +73,11 @@ public class MenuModel implements Serializable {
         this.detailImagePaths = detailImagePaths;
     }
 
-    public int getStars() {
-        return stars;
+    public int getAppraise() {
+        return appraise;
     }
 
-    public void setStars(int stars) {
-        this.stars = stars;
+    public void setAppraise(int appraise) {
+        this.appraise = appraise;
     }
 }
