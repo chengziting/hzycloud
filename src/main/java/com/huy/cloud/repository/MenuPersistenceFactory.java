@@ -1,5 +1,6 @@
 package com.huy.cloud.repository;
 
+import com.huy.cloud.HzyCloudApplication;
 import com.huy.cloud.model.MenuModel;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -8,16 +9,20 @@ import org.dom4j.Element;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.math.BigDecimal;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,11 +33,17 @@ import java.util.List;
 public class MenuPersistenceFactory {
     private static int  currentId = 1000;
     private static final String MENU_ID_PREFIX = "menu_";
+    private static final String MENU_FILE_PATH = "classpath:menu-list.xml";
+    private static final String OUT_MENU_LIST_PATH = "/out/menu-list.xml";
+
+    private ResourceLoader resourceLoader;
+
 
 
     private List<MenuModel> menuList = new ArrayList<>();
 
-    private MenuPersistenceFactory(){
+    private MenuPersistenceFactory(@Autowired ResourceLoader resourceLoader){
+        this.resourceLoader = resourceLoader;
         try {
             menuList = loadMenuFromFile();
         } catch (DocumentException e) {
@@ -45,8 +56,16 @@ public class MenuPersistenceFactory {
     private List<MenuModel> loadMenuFromFile() throws DocumentException, IOException {
         List<MenuModel> list = new ArrayList<>();
         SAXReader reader = new SAXReader();
-        File menuFile = new ClassPathResource("menu-list.xml").getFile();
-        Document doc = reader.read(menuFile);
+        Document doc = null;
+
+        File file = new File(HzyCloudApplication.getHomePath().getPath() + OUT_MENU_LIST_PATH);
+
+        if(!file.exists()) {
+            InputStream inputStream = resourceLoader.getResource(MENU_FILE_PATH).getInputStream();
+            doc = reader.read(inputStream);
+        }else{
+            doc = reader.read(file);
+        }
         Element root = doc.getRootElement();
 
         List<Element> items = root.elements();
@@ -114,11 +133,25 @@ public class MenuPersistenceFactory {
         //设置输出编码
         format.setEncoding("UTF-8");
 
-        File file = new ClassPathResource("menu-list.xml").getFile();
+        File file = getOutFile();
         //生成XMLWriter对象，构造函数中的参数为需要输出的文件流和格式
         XMLWriter writer = new XMLWriter(new FileOutputStream(file), format);
         //开始写入，write方法中包含上面创建的Document对象
         writer.write(doc);
+    }
+
+    private File getOutFile() throws IOException {
+        String homePath = HzyCloudApplication.getHomePath().getPath();
+        String pathStr = homePath + "/out";
+        Path path = Paths.get(pathStr);
+        if(!path.toFile().exists()){
+            Files.createDirectory(path);
+            Path file = Files.createFile(Paths.get(homePath + OUT_MENU_LIST_PATH));
+            if(!file.toFile().exists())
+                throw  new IOException("create out file[menu-list.xml] failed!");
+            return file.toFile();
+        }
+        return new File(homePath + OUT_MENU_LIST_PATH);
     }
 
 
@@ -149,6 +182,7 @@ public class MenuPersistenceFactory {
             saveMenuListToFile();
 
         }catch (Exception ex){
+            ex.printStackTrace();
             currentId--;
         }
     }

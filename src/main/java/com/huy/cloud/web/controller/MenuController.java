@@ -20,7 +20,7 @@ public class MenuController {
     @ResponseBody
     public List<MenuModel> getMenu(){
         List<MenuModel> list = menuRepo.getMenuList();
-        menuRepo.addMenu(list.get(0));
+//        menuRepo.addMenu(list.get(0));
         return list;
     }
 }
