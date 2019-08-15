@@ -1,0 +1,1231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Pandora" basedir="." default="help">
+
+<!--Define Acrobat lib version-->
+  <property name="Adobe_pdfl_lib_Vesrion15" value=""/>
+  <condition property="pandora.Adobe_pdfl_lib_Path" value="/adobepdflib81">
+    <isset property="Adobe_pdfl_lib_Vesrion8"/>
+  </condition>
+
+  <condition property="pandora.Adobe_pdfl_lib_Path" value="/Adobe/pdfl/15">
+    <isset property="Adobe_pdfl_lib_Vesrion15"/>
+  </condition>
+
+  <condition property ="pandora.core.pdflib_WinDLL" value="ARAXI_PDFL80_VC80.dll">
+	  <isset property="Adobe_pdfl_lib_Vesrion8"/>
+  </condition>
+
+  <condition property ="pandora.core.pdflib_WinDLL" value="ARAXI_PDFL150_VC80.dll">
+	  <isset property="Adobe_pdfl_lib_Vesrion15"/>
+  </condition>
+  
+  <condition property="pandora.is.Adobe_pdfl_lib15">
+    <and>
+      <isset property="Adobe_pdfl_lib_Vesrion15"/>
+	  <os family="mac"/>
+	</and>
+  </condition>
+  <!--end Define Acrobat lib version-->
+  
+    <!-- Set global properties -->
+    <property environment="myenv"/>
+ 
+    <!--
+    <condition property="pandora.msdev_version.internal" value="true">
+        <or>
+            <isset property="myenv.PANDORA_BUILD_MSDEV_VERSION"/>
+            <isset property="msdev.version"/>
+        </or>
+    </condition>
+		-->
+
+    <property name="pandora.xcode_tool_cpmac" value="/Applications/Xcode.app/Contents/Developer/Tools/CpMac"/>
+
+
+		<condition property="pandora.msdev_version" value="">
+			<and>
+				<isset property="msdev.version"/>
+				<equals arg1="${msdev.version}" arg2="7"/>
+			</and>
+    </condition> 
+ 
+    
+ 
+		<condition property="pandora.msdev_version" value="_VC9">
+  		<and>
+				<isset property="msdev.version"/>
+				<equals arg1="${msdev.version}" arg2="9"/>
+			</and>
+    </condition> 
+
+		<condition property="pandora.msdev_version" value="_VC8">
+			<or>
+	  		<and>
+					<isset property="msdev.version"/>
+					<equals arg1="${msdev.version}" arg2="8"/>
+				</and> 
+				<not><isset property="msdev.version"/></not>
+			</or>
+    </condition>
+
+
+		<echo message="================${pandora.msdev_version}==================="/> 
+		
+
+<!--
+		<condition property="isMsDev7">
+ 
+			<and>
+				<isset property="msdev.version"/>
+				<equals arg1="${msdev.version}" arg2="7"/>
+			</and>
+    </condition> 
+		<echo message="===================isMsDev7= ${isMsDev7}====================================="/> 
+		<condition property="pandora.msdev_version" value="">
+			<istrue value="${isMsDev7}" />
+    </condition>
+		<echo message="================${pandora.msdev_version}==================="/> 
+
+		<condition property="isMsDev9">
+  		<and>
+				<isset property="msdev.version"/>
+				<equals arg1="${msdev.version}" arg2="9"/>
+			</and>
+    </condition> 
+		<echo message="===================isMsDev9= ${isMsDev9}====================================="/> 
+		<condition property="pandora.msdev_version" value="_VC9">
+			<istrue value="${isMsDev9}" />
+    </condition>
+	 <echo message="================${pandora.msdev_version}==================="/>
+
+
+		<condition property="isMsDev8">
+  		<and>
+				<isset property="msdev.version"/>
+				<equals arg1="${msdev.version}" arg2="8"/>
+			</and>
+    </condition> 
+		<condition property="noMsDev">
+  		<and>
+				<not><isset property="msdev.version"/></not>
+
+			</and>
+    </condition> 
+    <echo message="===================noMsDev= ${noMsDev}====================================="/>   
+		<echo message="===================isMsDev8= ${isMsDev8}====================================="/> 
+		<condition property="pandora.msdev_version" value="_VC8">
+			<or>
+				<istrue value="${isMsDev8}" />
+				<istrue value="${noMsDev}" />
+			</or>
+    </condition>
+	 <echo message="================${pandora.msdev_version}==================="/>
+-->
+    
+    <!--
+    <condition property="pandora.msdev_version" value="_VC9">
+     	<and>
+				<isset property="msdev.version"/>
+				<istrue value="9" />
+			</and>
+    </condition>
+ 
+    
+    <equals arg1="${script2.result}" arg2="1"/>
+-->
+
+
+    <target name="preinit_ostype_determine_os">
+        <!-- Define properties whose value is either "true" or unset
+             depending on which platform this build executes on. -->
+        <condition property="pandora.isMac">
+            <os family="mac"/>
+        </condition>
+        <condition property="pandora.isWindows">
+            <os family="windows"/>
+        </condition>
+			<echo message="${pandora.msdev_version}"/>
+			<!--fail message="Sorry, you can't directly execute this Ant script. Use script in Pandora/main/builds."/-->
+    </target>
+    
+  <!--
+		<target name="if_msdev_90" if="pandora.msdev_version.internal">
+        <echo message="Build with Microsoft's Visual Studio Professional 2008."/>
+        <property name="pandora.msdev_version" value="_VC9"/>
+    </target>   
+    <target name="if_msdev_70" if="pandora.msdev_version.internal">
+        <echo message="Build with Microsoft's Visual Studio Professional 2003."/>
+        <property name="pandora.msdev_version" value=""/>
+    </target>
+    <target name="if_msdev_80" unless="pandora.msdev_version.internal">
+        <echo message="Build with Microsoft's Visual Studio Professional 2005."/>
+        <property name="pandora.msdev_version" value="_VC8"/>
+    </target>
+-->
+
+       
+			    
+    <target name="preinit_ostype_if_mac" depends="preinit_ostype_determine_os" if="pandora.isMac">
+        <property name="pandora.platform" value="Mac"/>
+        <!--
+        <property name="javac.JAVA_HOME" value="/System/Library/Frameworks/JavaVM.framework/Versions/1.4.2"/>
+        -->
+        <!-- Use JDK 1.5 -->
+        <property name="javac.JAVA_HOME" value="/Library/Java/JavaVirtualMachines/jdk1.8.0_72.jdk/Contents/Home"/>
+        
+        <property name="javac.executable" value="${javac.JAVA_HOME}/bin/javac"/>
+        <property name="java.jvm" value="${javac.JAVA_HOME}/bin/java"/>
+        <property name="javah.executable" value="${javac.JAVA_HOME}/bin/javah"/>
+    </target>
+    <target name="preinit_ostype_if_win" depends="preinit_ostype_determine_os" if="pandora.isWindows">
+        <property name="pandora.platform" value="PC"/>
+        <!--
+				<property name="javac.JAVA_HOME" value="${myenv.JAVA_HOME}"/>
+        -->
+        <!-- Use JDK 1.5          -->
+        <!-- <property name="javac.JAVA_HOME" value="${myenv.JAVA_HOME_6}"/>  
+		<property name="java.versionNumber" value="1.6_29"/> -->
+		
+		<!-- Use JDK 1.8 -->
+		<property name="javac.JAVA_HOME" value="${myenv.JAVA_HOME_8}"/>  
+		<property name="java.versionNumber" value="1.8.0_72"/>
+        
+        <!-- Use JDK 1.6 
+        <property name="javac.JAVA_HOME" value="${myenv.JAVA_HOME_6}"/>
+        -->
+        
+        <property name="javac.executable" value="${javac.JAVA_HOME}/bin/javac"/>
+        <property name="java.jvm" value="${javac.JAVA_HOME}/bin/java"/>
+        <property name="javah.executable" value="${javac.JAVA_HOME}/bin/javah"/>
+    </target>
+    <target name="preinit_ostype" depends="preinit_ostype_if_mac, preinit_ostype_if_win"/>
+
+    <target name="preinit_someproperties">
+        <property name="pandora.root_dir" location=".."/>
+        <property name="pandora.depot" location="../../../../"/>
+        <property name="pandora.builds_dir" location="."/>
+        <property name="pandora.application_dir"
+                  location="${pandora.root_dir}/app"/>
+        <property name="pandora.application.java_srcdir"
+                  location="${pandora.application_dir}/Java/src"/>
+                  
+        <property name="pandora.service_dir"
+                  location="${pandora.root_dir}/WhistlerWebService"/>
+        <property name="pandora.service.src_dir"
+                  location="${pandora.service_dir}/src"/>
+        <property name="pandora.service.working_dir"
+                  location="${pandora.service_dir}/working"/>
+
+        <property name="pandora.builds.parent_of_workdir"
+                  location="${pandora.builds_dir}"/>
+        <property name="pandora.builds.workdirname"
+                  value="working"/>
+        <property name="pandora.builds.workdir"
+                  location="${pandora.builds.parent_of_workdir}/${pandora.builds.workdirname}"/>
+
+        <property name="pandora.builds.builder.workdir"
+                  location="${pandora.builds.workdir}/builder"/>
+    </target>
+
+    <target name="init" depends="preinit_ostype, preinit_someproperties">
+        <echo message="project name: ${ant.project.name}"/>
+        <echo message="buildfile: ${ant.file}"/>
+
+        <!-- The branch name (e.g., "main", "r270") is assumed to be defined on the ant command line
+             via the property named "pandora.buildbot.product". If this property isn't defined,
+             or if it has the value "product", the branch name will be set to "unknown". -->
+        <condition property="pandora.branch" value="unknown">
+            <or>
+                <and>
+                    <isset property="pandora.buildbot.product"/>
+                    <equals arg1="${pandora.buildbot.product}" arg2="product"/>
+                </and>
+                <not>
+                    <isset property="pandora.buildbot.product"/>
+                </not>
+            </or>
+        </condition>
+        <condition property="pandora.branch" value="${pandora.buildbot.product}">
+            <not>
+                <isset property="pandora.branch"/>
+            </not>
+        </condition>
+        <echo message="branch: ${pandora.branch}"/>
+
+        <!-- Get local date and time. -->
+        <tstamp>
+            <!-- Formatted like this: "Mon Mar 18 22:54:01 2002 PST". -->
+            <format property="pandora.local_datetime"
+                    pattern="EEE MMM dd HH:mm:ss yyyy z" />
+
+            <!-- Formatted like this: "2002-03-18 2254.01". -->
+            <format property="pandora.local_datetime2"
+                    pattern="yyyy-MM-dd HHmm.ss" />
+        </tstamp>
+        <echo message="Build date/time is ${pandora.local_datetime}."/>
+
+        <!-- Load some properties from a file. -->
+        <property name="pandora.property_filename" value="pandoraBuild.properties"/>
+        <property file="${pandora.property_filename}" prefix="old"/>
+
+        <property name="pandora.old_build_num" value="${old.currentBuildNumber}"/>
+        <property name="pandora.version.major" value="${old.versionNumberMajor}"/>
+        <property name="pandora.version.minor" value="${old.versionNumberMinor}"/>
+        <property name="pandora.version.patch" value="${old.versionNumberPatch}"/>
+
+        <!-- The Pandora version used here should include only the major and minor number,
+             not the patch number.
+             E.g., for Pandora 2.7.1, pandora.version should be 2.7, not 2.7.1. -->
+        <!-- ******IMPORTANT NOTE**********************
+             For our 2.9.5 release, the pandora.version.patch value was included in the Pandora version
+             since we wanted 2.9.5 to act like a 2.Y.0 release.
+             For release after 2.9.5, someone should remove the .${pandora.version.patch} portion from the 
+             following statement   -->  
+        <property name="pandora.version" value="${pandora.version.major}.${pandora.version.minor}.${pandora.version.patch}"/>
+        <echo message="Current version ${pandora.version}, build number is ${pandora.old_build_num}."/>
+
+        <property name="pandora.copyright.year" value="2007"/>
+
+        <property name="pandora.buildbot_config_filename"
+                  value="BuildBotConfig.txt"/>
+
+        <property name="pandora.mac_dev_volume_name"
+                  value="${myenv.PANDORA_BUILD_MAC_DEV_VOLUME}"/>
+
+        <property name="pandora.app_bundle_dirname"
+                  value="Pandora.app"/>
+
+        <property name="pandora.run_codewarrior_tool.path"
+                  location="${pandora.builds_dir}/Tools/OSX/RunCodeWarrior"/>
+        <property name="pandora.make_relative_alias_tool.path"
+                  location="${pandora.builds_dir}/Tools/OSX/MakeRelativeAlias/build/MakeRelativeAlias"/>
+
+        <property name="pandora.etc_dir"
+                  location="${pandora.root_dir}/etc"/>
+
+        <property name="pandora.external_dir"
+                  location="${pandora.root_dir}/external"/>
+
+        <property name="pandora.rip.pdflib_dir"
+                  location="${pandora.depot}/oem${pandora.Adobe_pdfl_lib_Path}"/>
+        <property name="pandora.core.commonlib_dir"
+                  location="${pandora.depot}/core/commonlib"/>
+        <property name="pandora.core.pdflib_dir"
+                  location="${pandora.depot}/Core/pdflib"/>
+       
+        <property name="pandora.oem_dir"
+                  location="${pandora.depot}/oem"/>
+
+        <property name="pandora.mysql_zipfile"
+                  location="${pandora.external_dir}/mysql-connector-java-3.0.11-stable.zip"/>
+        <property name="pandora.mysql_relativejardir"
+                  value="mysql-connector-java-3.0.11-stable"/>
+        <property name="pandora.mysql_jarname"
+                  value="mysql-connector-java-3.0.11-stable-bin.jar"/>
+        <property name="pandora.mysql_relativejarpath"
+                  value="${pandora.mysql_relativejardir}/${pandora.mysql_jarname}"/>
+
+        <property name="pandora.struts_dir"
+                  location="${pandora.external_dir}/jakarta-struts-1.1"/>
+        <property name="pandora.struts_jardir"
+                  location="${pandora.struts_dir}/lib"/>
+        <property name="pandora.struts_jarname"
+                  value="struts.jar"/>
+        <property name="pandora.struts_jarpath"
+                  location="${pandora.struts_jardir}/${pandora.struts_jarname}"/>
+
+        <property name="pandora.junit_dir"
+                  location="${pandora.external_dir}/junit3.8.1"/>
+
+        <property name="pandora.junit_jarpath"
+                  location="${pandora.junit_dir}/junit.jar"/>
+
+        <property name="pandora.tomcat_dir"
+                  location="${pandora.external_dir}/jakarta-tomcat-5.0.19"/>
+
+        <property name="pandora.servlet_jarpath"
+                  location="${pandora.tomcat_dir}/common/lib/servlet-api.jar"/>
+
+        <property name="pandora.builder_dir"
+                  location="${pandora.root_dir}/builder"/>
+        <property name="pandora.builder_jarname"
+                  value="Builder.jar"/>
+        <property name="pandora.builder_jardir"
+                  location="${pandora.builder_dir}/working/jars"/>
+        <property name="pandora.builder_jarpath"
+                  location="${pandora.builder_jardir}/${pandora.builder_jarname}"/>
+
+        <property name="pandora.ldb_dir"
+                  location="${pandora.root_dir}/ldb"/>
+        <property name="pandora.ldb_build_support_jarname"
+                  value="LDB_Build_Support.jar"/>
+        <property name="pandora.ldb_jardir"
+                  location="${pandora.ldb_dir}/working/jars"/>
+        <property name="pandora.ldb_build_support_jarpath"
+                  location="${pandora.ldb_jardir}/${pandora.ldb_build_support_jarname}"/>
+
+        <property name="pandora.apple_ui_jardir"
+                  location="${pandora.external_dir}/Apple/Java 1.4.2_03"/>
+        <property name="pandora.apple_ui_jarname" value="ui.jar"/>
+        <property name="pandora.apple_ui_jarpath"
+                  location="${pandora.apple_ui_jardir}/${pandora.apple_ui_jarname}"/>
+
+        <property name="pandora.java_cup_jardir"
+                  location="${pandora.external_dir}/working/jars"/>
+        <property name="pandora.java_cup_jarname" value="java_cup.jar"/>
+        <property name="pandora.java_cup_jarpath"
+                  location="${pandora.java_cup_jardir}/${pandora.java_cup_jarname}"/>
+
+        <property name="pandora.mail_jardir"
+                  location="${pandora.external_dir}/Sun/J2EE 1.4.2_02/lib"/>
+        <property name="pandora.mail_jarname" value="mail.jar"/>
+        <property name="pandora.mail_jarpath"
+                  location="${pandora.mail_jardir}/${pandora.mail_jarname}"/>
+
+        <property name="pandora.violin_strings_jardir"
+                  location="${pandora.external_dir}/ViolinStrings 1.0/classes"/>
+        <property name="pandora.violin_strings_jarname" value="ViolinStrings.jar"/>
+        <property name="pandora.violin_strings_jarpath"
+                  location="${pandora.violin_strings_jardir}/${pandora.violin_strings_jarname}"/>
+
+        <property name="pandora.xmlrpc_jarpath"
+                  location="${pandora.external_dir}/xmlrpc-1.2-b1/xmlrpc-1.2-b1.jar"/>
+
+        <property name="pandora.mockmaker_jarpath"
+                  location="${pandora.external_dir}/EclipseMockMaker 1.12.0/org.mockmaker.eclipse/lib/mmmockobjects.jar"/>
+
+        <property name="pandora.crimson_jarpath"
+                  location="${pandora.external_dir}/crimson.jar"/>
+
+        <property name="pandora.itext_jarpath"
+                  location="${pandora.external_dir}/iText/iText-2.1.3.jar"/>
+
+        <property name="pandora.application_nativedir"
+                  location="${pandora.application_dir}/Native"/>
+        <property name="pandora.application_pandora_dir"
+                  location="${pandora.application_nativedir}/Pandora"/>
+        <property name="pandora.application_runpandora_dir"
+                  location="${pandora.application_nativedir}/RunPandora"/>
+        <property name="pandora.application_workingdir"
+                  location="${pandora.application_dir}/working"/>
+                  
+        <property name="pandora.application_jardir"
+                  location="${pandora.application_workingdir}/jars"/>
+
+				<!-- separate jars -->
+        <property name="pandora.common_jarname" value="whistler-common.jar"/>
+        <property name="pandora.engine_shopmap_jarname" value="whistler-engine-shopmap.jar"/>
+        <property name="pandora.engine_kernel_jarname" value="whistler-engine-kernel.jar"/>
+        <property name="pandora.client_common_jarname" value="whistler-client-common.jar"/>
+        <property name="pandora.client_common_ui_jarname" value="whistler-client-common-ui.jar"/>
+        <property name="pandora.client_shopmap_ui_jarname" value="whistler-client-shopmap-ui.jar"/>
+        <property name="pandora.client_pandora_ui_jarname" value="whistler-client-pandora-ui.jar"/>
+        <property name="pandora.client_dummy_jarname" value="whistler-client-dummy.jar"/>
+        <property name="pandora.service_part2_jarname" value="whistler-service-part2.jar"/>
+        <property name="pandora.service_jarname" value="whistler-service.jar"/>
+        
+        <property name="pandora.common_jarpath"
+                  location="${pandora.application_jardir}/${pandora.common_jarname}"/>
+        <property name="pandora.engine_shopmap_jarpath"
+        					location="${pandora.application_jardir}/${pandora.engine_shopmap_jarname}"/>
+        <property name="pandora.engine_kernel_jarpath"
+        					location="${pandora.application_jardir}/${pandora.engine_kernel_jarname}"/>
+        <property name="pandora.client_common_jarpath"
+        					location="${pandora.application_jardir}/${pandora.client_common_jarname}"/>
+        <property name="pandora.client_dummy_jarpath"
+        					location="${pandora.application_jardir}/${pandora.client_dummy_jarname}"/>
+        <property name="pandora.client_common_ui_jarpath"
+        					location="${pandora.application_jardir}/${pandora.client_common_ui_jarname}"/>
+        <property name="pandora.client_shopmap_ui_jarpath"
+        					location="${pandora.application_jardir}/${pandora.client_shopmap_ui_jarname}"/>
+        <property name="pandora.client_pandora_ui_jarpath"
+        					location="${pandora.application_jardir}/${pandora.client_pandora_ui_jarname}"/>
+        <property name="pandora.service_part2_jarpath"
+        					location="${pandora.application_jardir}/${pandora.service_part2_jarname}"/>
+        <property name="pandora.service_jarpath"
+        					location="${pandora.application_jardir}/${pandora.service_jarname}"/>
+        					
+        <property name="pandora.powerpack_jarname" value="PowerPack.jar"/>
+        <property name="pandora.powerpack_jarpath"
+                  location="${pandora.application_jardir}/${pandora.powerpack_jarname}"/>
+        <property name="pandora.application_dlldir"
+                  location="${pandora.application_workingdir}/dlls"/>
+        <property name="pandora.application_exedir"
+                  location="${pandora.application_workingdir}/exes"/>
+        <property name="pandora.application.java_srcdir"
+                  location="${pandora.application_dir}/Java/src"/>
+        <property name="pandora.application_testclassdir"
+                  location="${pandora.application_workingdir}/testclasses"/>
+
+        <property name="pandora.test_dir"
+                  location="${pandora.root_dir}/test"/>
+        <property name="pandora.guitest_dir"
+                  location="${pandora.test_dir}/GUI"/>
+        
+        <property name="pandora.tools_dir"
+                  location="${pandora.root_dir}/tools"/>
+
+        <property name="pandora.libs_for_developers.parentdir"
+                  location="${pandora.builds.workdir}"/>
+        <property name="pandora.libs_for_developers.dirname"
+                  value="Libs For Developers"/>
+        <property name="pandora.libs_for_developers.dir"
+                  location="${pandora.libs_for_developers.parentdir}/${pandora.libs_for_developers.dirname}"/>
+        <property name="pandora.frameworks_for_developers.dir"
+                  location="${pandora.libs_for_developers.dir}/Frameworks"/>
+
+        <property name="pandora.install_dir"
+                  location="${pandora.root_dir}/install"/>
+        <property name="pandora.install_src_dir"
+                  location="${pandora.install_dir}/src"/>
+
+        <property name="pandora.nestlib_dir"
+                  location="${pandora.root_dir}/nestlib"/>
+        <property name="pandora.nestlib_nativedir"
+                  location="${pandora.nestlib_dir}/Native"/>
+        <property name="pandora.nestlib_workingdir"
+                  location="${pandora.nestlib_dir}/working"/>
+        <property name="pandora.nestlib_classdir"
+                  location="${pandora.nestlib_workingdir}/classes"/>
+        <property name="pandora.nestlib_dlldir"
+                  location="${pandora.nestlib_workingdir}/dlls"/>
+
+       <property name="pandora.hibernate_jarpath"
+									location="${pandora.external_dir}/hibernate-3.6.0.Final/hibernate3.jar"/>
+        <property name="pandora.hibernate_jardir"
+									location="${pandora.external_dir}/hibernate-3.6.0.Final/lib"/>
+        <property name="pandora.external_dir.mysql"
+									location="${pandora.external_dir}/mysql-5.0.27"/>
+        <property name="pandora.tomcat_dir_5.5"
+                  location="${pandora.external_dir}/apache-tomcat-5.5.25"/>
+        <property name="pandora.poi_jardir"
+									location="${pandora.external_dir}/poi"/>
+									
+									
+									
+									
+        <property name="pandora.cxf_jardir"
+									location="${pandora.external_dir}/apache-cxf-2.4.0/lib"/>
+        <!-- Is the Builder jar present? -->
+        <condition property="pandora.builder_jar_present">
+            <and>
+                <not>
+                    <isset property="pandora.builder_jar_present"/>
+                </not>
+                <and>
+                    <available file="${pandora.builder_jarpath}"/>
+                </and>
+            </and>
+        </condition>
+
+        <property name="pandora.builds.generated_files.strings_dir.relative_path"
+                  value="com/kodak/whistler/common/resources"/>
+        <property name="pandora.builds.generated_files.string_constants.relative_path"
+                  value="${pandora.builds.generated_files.strings_dir.relative_path}/SSiResConstants.java"/>
+        <property name="pandora.builds.generated_files.string_constants.filesystem_path"
+                  location="${pandora.application.java_srcdir}/${pandora.builds.generated_files.string_constants.relative_path}"/>
+        <property name="pandora.builds.generated_files.generated_string_constants.filesystem_path"
+                  location="${pandora.builds.builder.workdir}/${pandora.builds.generated_files.string_constants.relative_path}"/>
+        <property name="pandora.builds.generated_files.strings_en.relative_path"
+                  value="${pandora.builds.generated_files.strings_dir.relative_path}/SSiStrings.properties"/>
+        <property name="pandora.builds.generated_files.strings_en.filesystem_path"
+                  location="${pandora.application.java_srcdir}/${pandora.builds.generated_files.strings_en.relative_path}"/>
+        <property name="pandora.builds.generated_files.generated_strings_en.filesystem_path"
+                  location="${pandora.builds.builder.workdir}/${pandora.builds.generated_files.strings_en.relative_path}"/>
+        <property name="pandora.builds.generated_files.strings_de.relative_path"
+                  value="${pandora.builds.generated_files.strings_dir.relative_path}/SSiStrings_de_DE.properties"/>
+        <property name="pandora.builds.generated_files.strings_de.filesystem_path"
+                  location="${pandora.application.java_srcdir}/${pandora.builds.generated_files.strings_de.relative_path}"/>
+        <property name="pandora.builds.generated_files.generated_strings_de.filesystem_path"
+                  location="${pandora.builds.builder.workdir}/${pandora.builds.generated_files.strings_de.relative_path}"/>
+        <property name="pandora.builds.generated_files.strings_es.relative_path"
+                  value="${pandora.builds.generated_files.strings_dir.relative_path}/SSiStrings_es_ES.properties"/>
+        <property name="pandora.builds.generated_files.strings_es.filesystem_path"
+                  location="${pandora.application.java_srcdir}/${pandora.builds.generated_files.strings_es.relative_path}"/>
+        <property name="pandora.builds.generated_files.generated_strings_es.filesystem_path"
+                  location="${pandora.builds.builder.workdir}/${pandora.builds.generated_files.strings_es.relative_path}"/>
+        <property name="pandora.builds.generated_files.strings_fr.relative_path"
+                  value="${pandora.builds.generated_files.strings_dir.relative_path}/SSiStrings_fr_FR.properties"/>
+        <property name="pandora.builds.generated_files.strings_fr.filesystem_path"
+                  location="${pandora.application.java_srcdir}/${pandora.builds.generated_files.strings_fr.relative_path}"/>
+        <property name="pandora.builds.generated_files.generated_strings_fr.filesystem_path"
+                  location="${pandora.builds.builder.workdir}/${pandora.builds.generated_files.strings_fr.relative_path}"/>
+        <property name="pandora.builds.generated_files.strings_ja.relative_path"
+                  value="${pandora.builds.generated_files.strings_dir.relative_path}/SSiStrings_ja_JP.properties"/>
+        <property name="pandora.builds.generated_files.strings_ja.filesystem_path"
+                  location="${pandora.application.java_srcdir}/${pandora.builds.generated_files.strings_ja.relative_path}"/>
+        <property name="pandora.builds.generated_files.generated_strings_ja.filesystem_path"
+                  location="${pandora.builds.builder.workdir}/${pandora.builds.generated_files.strings_ja.relative_path}"/>                  
+        <property name="pandora.builds.generated_files.strings_it.relative_path"
+                  value="${pandora.builds.generated_files.strings_dir.relative_path}/SSiStrings_it_IT.properties"/>
+        <property name="pandora.builds.generated_files.strings_it.filesystem_path"
+                  location="${pandora.application.java_srcdir}/${pandora.builds.generated_files.strings_it.relative_path}"/>
+        <property name="pandora.builds.generated_files.generated_strings_it.filesystem_path"
+                  location="${pandora.builds.builder.workdir}/${pandora.builds.generated_files.strings_it.relative_path}"/>
+		<property name="pandora.builds.generated_files.strings_cs.relative_path"
+                  value="${pandora.builds.generated_files.strings_dir.relative_path}/SSiStrings_zh_CN.properties"/>
+		<property name="pandora.builds.generated_files.strings_cs.filesystem_path"
+                  location="${pandora.application.java_srcdir}/${pandora.builds.generated_files.strings_cs.relative_path}"/>
+        <property name="pandora.builds.generated_files.generated_strings_cs.filesystem_path"
+                  location="${pandora.builds.builder.workdir}/${pandora.builds.generated_files.strings_cs.relative_path}"/>
+		
+        <!-- begin: merged from pla162. changelist 269956.  -->         
+        <property name="PLA.Client.source_dir"               
+                  location="${pandora.root_dir}/../PrinergyLayoutAutomation"/>
+        <property name="PLA.Client.dest_dir"
+                  location="${pandora.root_dir}/PrinergyLayoutAutomation"/>
+
+
+    </target>
+    
+
+    <target name="determine_debug_state">
+        <condition property="pandora.enable_debug.internal" value="true">
+            <or>
+                <isset property="myenv.PANDORA_BUILD_DEBUG"/>
+                <isset property="pandora.enable_debug"/>
+            </or>
+        </condition>
+    </target>
+    <target name="if_debug" if="pandora.enable_debug.internal">
+        <echo message="Debug build."/>
+        <property name="pandora.debug" value="true"/>
+        <condition property="pandora.debugWindows">
+            <os family="windows"/>
+        </condition>
+        <condition property="pandora.debugMac">
+            <os family="mac"/>
+        </condition>
+        <property name="pandora.javac_debug" value="on"/>
+        <property name="pandora.javac_optimize" value="off"/>
+        <property name="pandora.msdev_cfg_kind" value="Debug"/>
+        <property name="pandora.xcodebuild_debug" value="true"/>
+        <property name="pandora.xcodebuild_style" value="Development"/>
+        <property name="pandora.python_debug" value="-d"/>
+    </target>
+    <target name="if_nodebug" unless="pandora.enable_debug.internal">
+        <echo message="Non-debug build. If you want a debug build, define the PANDORA_BUILD_DEBUG environment variable."/>
+        <property name="pandora.nodebug" value="true"/>
+        <condition property="pandora.nodebugWindows">
+            <os family="windows"/>
+        </condition>
+        <condition property="pandora.nodebugMac">
+            <os family="mac"/>
+        </condition>
+        <property name="pandora.javac_debug" value="off"/>
+        <property name="pandora.javac_optimize" value="on"/>
+        <property name="pandora.msdev_cfg_kind" value="Release"/>
+        <property name="pandora.xcodebuild_debug" value="false"/>
+        <property name="pandora.xcodebuild_style" value="Deployment"/>
+        <property name="pandora.python_debug" value=""/>
+    </target>
+    <target name="check_debug" depends="determine_debug_state, if_debug, if_nodebug"/>
+
+    <target name="fail_if_mac_dev_volume_undefined" depends="init"
+            unless="myenv.PANDORA_BUILD_MAC_DEV_VOLUME"
+            if="pandora.isMac">
+        <fail>
+PANDORA_BUILD_MAC_DEV_VOLUME environment variable is undefined.
+This environment variable must name the Macintosh volume containing the development source code files.</fail>
+    </target>
+
+    <target name="verify_builder_jarfile_exists" depends="init"
+            unless="pandora.builder_jar_present">
+        <fail message="Missing ${pandora.builder_jarpath}."/>
+    </target>
+
+    <target name="get_build_number_if_advanced" depends="init" if="pandora.builds.advance_build_number">
+        <!-- Load some properties from the file that is changed when the build number is advanced. -->
+        <property file="${pandora.property_filename}" prefix="new"/>
+
+        <property name="pandora.build_num" value="${new.currentBuildNumber}"/>
+        <echo message="New build number is ${pandora.build_num}."/>
+    </target>
+    <target name="get_build_number_if_set" depends="init" if="pandora.builds.set_build_number">
+        <property name="pandora.build_num" value="${pandora.builds.buildbot_build_number}"/>
+    </target>
+    <target name="get_build_number_if_not_changed" depends="init" unless="pandora.builds.build_number_changed">
+        <property name="pandora.build_num" value="${pandora.old_build_num}"/>
+    </target>
+    <target name="get_build_number" depends="get_build_number_if_advanced, get_build_number_if_set, get_build_number_if_not_changed"/>
+
+    <target name="createLdbBuildSupportJar" depends="init, check_debug">
+        <ant antfile="build.xml" dir="${pandora.ldb_dir}" target="createBuildSupportJar"/>
+    </target>
+
+    <target name="buildBuilder" depends="init, createLdbBuildSupportJar">
+        <ant antfile="build.xml" dir="${pandora.builder_dir}" target="createBuilder"/>
+    </target>
+
+    <target name="buildLocalizer" depends="init, check_debug">
+        <ant antfile="build.xml" dir="${pandora.ldb_dir}" target="createLocalizer"/>
+    </target>
+
+    <target name="createPandoraJar" depends="init, check_debug, get_build_number">
+        <ant antfile="build.xml" dir="${pandora.external_dir}" target="createJavaCupJar"/>
+        <ant antfile="build.xml" dir="${pandora.application_dir}" target="createPandoraJar"/>
+    </target>
+
+    <target name="buildApp" depends="init, check_debug, fail_if_mac_dev_volume_undefined, get_build_number">
+        <ant antfile="build.xml" dir="${pandora.external_dir}" target="createJavaCupJar"/>
+        <ant antfile="build.xml" dir="${pandora.nestlib_dir}" target="compileJava"/>
+        <ant antfile="build.xml" dir="${pandora.application_dir}" target="buildAll"/>
+        <ant antfile="build.xml" dir="${pandora.service_dir}" target="buildService"/>
+        <ant antfile="build.xml" dir="." target="buildDBTool"/>
+        <!-- <ant antfile="build.xml" dir="." target="buildPLA"/> -->
+    </target>
+
+    <target name="buildCorelib" depends="init, check_debug, fail_if_mac_dev_volume_undefined">
+        <echo message="*****we do not build core everytime  *** "/>
+    </target>
+  
+    <target name="buildNestlib" depends="init, check_debug, fail_if_mac_dev_volume_undefined">
+	<echo message="***** delete nestlib  *** "/>
+        <!--<ant antfile="build.xml" dir="${pandora.nestlib_dir}" target="compileNative"/>-->
+    </target>
+
+    <target name="buildSpring" depends="init, check_debug">
+        <ant antfile="build.xml" dir="${pandora.ldb_dir}" target="createSpring"/>
+    </target>
+
+    <target name="buildGuiTester" depends="init, check_debug, createPandoraJar">
+    		<echo message="***** No action for buildGuiTester with Whistler"/>
+    		<!--
+        <ant antfile="build.xml" dir="${pandora.guitest_dir}" target="buildAll"/>
+        -->
+    </target>
+
+    <target name="createCrcFile" depends="init, check_debug"  if="pandora.isWindows">
+        <!-- This runs CRCTester to generate a zmisc.arj file that contains
+             the CRC of the size/content of some jars/DLLs. -->
+        <ant antfile="build.xml" dir="${pandora.application_dir}" target="createCrcFile"/>
+    </target>
+
+    <target name="createPandoraInstaller" depends="init, check_debug, get_build_number">
+        <ant antfile="buildPandora.xml" dir="${pandora.install_dir}" target="createInstaller"/>
+    </target>
+    <target name="createWhistlerInstaller" depends="init, check_debug, get_build_number">
+        <ant antfile="build.xml" dir="${pandora.install_dir}" target="createInstaller"/>
+    </target>
+    <target name="createInstaller" depends="init, check_debug, get_build_number">
+        <ant antfile="buildPandora.xml" dir="${pandora.install_dir}" target="createInstaller"/>
+        <ant antfile="build.xml" dir="${pandora.install_dir}" target="createInstaller"/>
+    </target>
+    <target name="distributeInstaller" depends="init, check_debug, get_build_number">
+        <ant antfile="buildPandora.xml" dir="${pandora.install_dir}" target="distributeInstaller"/>
+        <ant antfile="build.xml" dir="${pandora.install_dir}" target="distributeInstaller"/>
+    </target>
+	<target name="distributePandoraInstaller" depends="init, check_debug, get_build_number">
+        <ant antfile="buildPandora.xml" dir="${pandora.install_dir}" target="distributeInstaller"/>
+     </target>
+    <target name="distributeWhistlerInstaller" depends="init, check_debug, get_build_number">
+        <ant antfile="build.xml" dir="${pandora.install_dir}" target="distributeInstaller"/>
+    </target>
+    <target name="runBuilder_adjustOptions_null">
+        <property name="pandora.builds.runbuilder.option1"
+                  value="-blat"/>
+        <property name="pandora.builds.runbuilder.option2"
+                  value="-blat"/>
+    </target>
+    <target name="runBuilder_run" depends="init, check_debug, verify_builder_jarfile_exists">
+        <!-- This phase runs the Builder to generate some source files. -->
+        <delete dir="${pandora.builds.builder.workdir}" quiet="true"/>
+        <mkdir dir="${pandora.builds.builder.workdir}"/>
+        <copy todir="${pandora.builds.builder.workdir}"
+              file="${pandora.builds_dir}/pandoraBuild.properties"/>
+        <java jar="${pandora.builder_jarpath}" failonerror="true" fork="true" jvm="${java.jvm}">
+            <arg path="${pandora.builds.builder.workdir}/pandoraBuild.properties"/>
+            <arg value="pandorabuildmac.cn.kodak.com"/>
+            <arg value="WhistlerLocalization"/>
+            <arg value="${pandora.builds.builder.workdir}/"/>
+            <arg value="${pandora.builds.runbuilder.option1}"/>
+            <arg value="${pandora.builds.runbuilder.option2}"/>
+        </java>
+    </target>
+    <target name="runBuilder_compareStrings">
+        <!-- Java constants -->
+        <condition property="string_constants_changed">
+            <not>
+                <filesmatch file1="${pandora.builds.generated_files.string_constants.filesystem_path}"
+                            file2="${pandora.builds.generated_files.generated_string_constants.filesystem_path}"/>
+            </not>
+        </condition>
+        <!-- German -->
+        <condition property="strings_de_changed">
+            <not>
+                <filesmatch file1="${pandora.builds.generated_files.strings_de.filesystem_path}"
+                            file2="${pandora.builds.generated_files.generated_strings_de.filesystem_path}"/>
+            </not>
+        </condition>
+        <!-- English -->
+        <condition property="strings_en_changed">
+            <not>
+                <filesmatch file1="${pandora.builds.generated_files.strings_en.filesystem_path}"
+                            file2="${pandora.builds.generated_files.generated_strings_en.filesystem_path}"/>
+            </not>
+        </condition>
+        <!-- Spanish -->
+        <condition property="strings_es_changed">
+            <not>
+                <filesmatch file1="${pandora.builds.generated_files.strings_es.filesystem_path}"
+                            file2="${pandora.builds.generated_files.generated_strings_es.filesystem_path}"/>
+            </not>
+        </condition>
+        <!-- French -->
+        <condition property="strings_fr_changed">
+            <not>
+                <filesmatch file1="${pandora.builds.generated_files.strings_fr.filesystem_path}"
+                            file2="${pandora.builds.generated_files.generated_strings_fr.filesystem_path}"/>
+            </not>
+        </condition>
+        <!-- Japanese -->
+        <condition property="strings_ja_changed">
+            <not>
+                <filesmatch file1="${pandora.builds.generated_files.strings_ja.filesystem_path}"
+                            file2="${pandora.builds.generated_files.generated_strings_ja.filesystem_path}"/>
+            </not>
+        </condition>
+        
+        <!-- Italian -->
+        <condition property="strings_it_changed">
+            <not>
+                <filesmatch file1="${pandora.builds.generated_files.strings_it.filesystem_path}"
+                            file2="${pandora.builds.generated_files.generated_strings_it.filesystem_path}"/>
+            </not>
+        </condition>
+		
+		<!-- Chinese -->
+        <condition property="strings_zh_changed">
+            <not>
+                <filesmatch file1="${pandora.builds.generated_files.strings_cs.filesystem_path}"
+                            file2="${pandora.builds.generated_files.generated_strings_cs.filesystem_path}"/>
+            </not>
+        </condition>
+		
+        <condition property="one_or_more_strings_changed">
+            <or>
+                <isset property="string_constants_changed"/>
+                <isset property="strings_de_changed"/>
+                <isset property="strings_en_changed"/>
+                <isset property="strings_es_changed"/>
+                <isset property="strings_fr_changed"/>
+                <isset property="strings_ja_changed"/>
+                <isset property="strings_it_changed"/>
+                <isset property="strings_zh_changed"/>
+            </or>
+        </condition>
+    </target>
+    <target name="runBuilder_isCheckoutNeeded" depends="runBuilder_compareStrings">
+        <condition property="checkout_is_needed">
+            <or>
+                <isset property="one_or_more_strings_changed"/>
+                <isset property="pandora.builds.build_number_changed"/>
+            </or>
+        </condition>
+    </target>
+    <target name="runBuilder_openPerforceChangelist" if="checkout_is_needed">
+        <p4change description="Changed by Builder tool."/>
+        <echo message="Opened Perforce changelist ${p4.change}."/>
+    </target>
+    <target name="runBuilder_edit_constants" depends="preinit_someproperties" if="string_constants_changed">
+        <p4edit view="${pandora.application_dir}/Java/src/${pandora.builds.generated_files.string_constants.relative_path}"
+                change="${p4.change}"/>
+        <copy tofile="${pandora.builds.generated_files.string_constants.filesystem_path}"
+              file="${pandora.builds.generated_files.generated_string_constants.filesystem_path}"
+              overwrite="true"/>
+    </target>
+    <target name="runBuilder_edit_de_strings" depends="preinit_someproperties" if="strings_de_changed">
+        <p4edit view="${pandora.application_dir}/Java/src/${pandora.builds.generated_files.strings_de.relative_path}"
+                change="${p4.change}"/>
+        <copy tofile="${pandora.builds.generated_files.strings_de.filesystem_path}"
+              file="${pandora.builds.generated_files.generated_strings_de.filesystem_path}"
+              overwrite="true"/>
+    </target>
+    <target name="runBuilder_edit_en_strings" depends="preinit_someproperties" if="strings_en_changed">
+        <p4edit view="${pandora.application_dir}/Java/src/${pandora.builds.generated_files.strings_en.relative_path}"
+                change="${p4.change}"/>
+        <copy tofile="${pandora.builds.generated_files.strings_en.filesystem_path}"
+              file="${pandora.builds.generated_files.generated_strings_en.filesystem_path}"
+              overwrite="true"/>
+    </target>
+    <target name="runBuilder_edit_es_strings" depends="preinit_someproperties" if="strings_es_changed">
+        <p4edit view="${pandora.application_dir}/Java/src/${pandora.builds.generated_files.strings_es.relative_path}"
+                change="${p4.change}"/>
+        <copy tofile="${pandora.builds.generated_files.strings_es.filesystem_path}"
+              file="${pandora.builds.generated_files.generated_strings_es.filesystem_path}"
+              overwrite="true"/>
+    </target>
+    <target name="runBuilder_edit_fr_strings" depends="preinit_someproperties" if="strings_fr_changed">
+        <p4edit view="${pandora.application_dir}/Java/src/${pandora.builds.generated_files.strings_fr.relative_path}"
+                change="${p4.change}"/>
+        <copy tofile="${pandora.builds.generated_files.strings_fr.filesystem_path}"
+              file="${pandora.builds.generated_files.generated_strings_fr.filesystem_path}"
+              overwrite="true"/>
+    </target>
+    <target name="runBuilder_edit_ja_strings" depends="preinit_someproperties" if="strings_ja_changed">
+        <p4edit view="${pandora.application_dir}/Java/src/${pandora.builds.generated_files.strings_ja.relative_path}"
+                change="${p4.change}"/>
+        <copy tofile="${pandora.builds.generated_files.strings_ja.filesystem_path}"
+              file="${pandora.builds.generated_files.generated_strings_ja.filesystem_path}"
+              overwrite="true"/>
+    </target>    
+    <target name="runBuilder_edit_it_strings" depends="preinit_someproperties" if="strings_it_changed">
+        <p4edit view="${pandora.application_dir}/Java/src/${pandora.builds.generated_files.strings_it.relative_path}"
+                change="${p4.change}"/>
+        <copy tofile="${pandora.builds.generated_files.strings_it.filesystem_path}"
+              file="${pandora.builds.generated_files.generated_strings_it.filesystem_path}"
+              overwrite="true"/>
+    </target>
+	
+	<target name="runBuilder_edit_zh_strings" depends="preinit_someproperties" if="strings_zh_changed">
+        <p4edit view="${pandora.application_dir}/Java/src/${pandora.builds.generated_files.strings_cs.relative_path}"
+                change="${p4.change}"/>
+        <copy tofile="${pandora.builds.generated_files.strings_cs.filesystem_path}"
+              file="${pandora.builds.generated_files.generated_strings_cs.filesystem_path}"
+              overwrite="true"/>
+    </target>
+	
+    <target name="runBuilder_edit_versioninfo" depends="preinit_someproperties" if="pandora.builds.build_number_changed">
+        <p4edit view="${pandora.application_dir}/Java/src/com/kodak/whistler/engine/kernel/system/SSiVersionInfo.java"
+                change="${p4.change}"/>
+        <copy todir="${pandora.application.java_srcdir}/com/kodak/whistler/engine/kernel/system"
+              file="${pandora.builds.builder.workdir}/com/kodak/whistler/engine/kernel/system/SSiVersionInfo.java"
+              overwrite="true"/>
+        <p4edit view="${pandora.builds_dir}/pandoraBuild.properties"
+                change="${p4.change}"/>
+        <copy tofile="${pandora.builds_dir}/pandoraBuild.properties"
+              file="${pandora.builds.builder.workdir}/pandoraBuild.properties.new"
+              overwrite="true"/>
+    </target>
+    <target name="runBuilder_edits"
+            depends="runBuilder_edit_constants, runBuilder_edit_de_strings, runBuilder_edit_en_strings, runBuilder_edit_es_strings, runBuilder_edit_fr_strings, runBuilder_edit_ja_strings, runBuilder_edit_it_strings, runBuilder_edit_zh_strings, runBuilder_edit_versioninfo"/>
+    <!--
+    <target name="runBuilder_submitPerforceChangelist" if="checkout_is_needed">
+        <p4submit change="${p4.change}"/>
+    </target>
+    -->
+    <target name="runBuilder_perforce"
+            depends="runBuilder_isCheckoutNeeded, runBuilder_openPerforceChangelist, runBuilder_edits"/>
+    <target name="runBuilder"
+            depends="runBuilder_adjustOptions_null, runBuilder_run, runBuilder_perforce, get_build_number"/>
+    <!--
+    <target name="runBuilderAndSubmitChanges" depends="runBuilder, runBuilder_submitPerforceChangelist"/>
+    -->
+    
+    <target name="collectLibsForDevelopers_lib10" if="pandora.is.Adobe_pdfl_lib10" >
+          <exec dir="${pandora.application_workingdir}/frameworks"
+              executable="/Applications/Xcode.app/Contents/Developer/Tools/CpMac" failonerror="true" >
+            <arg value="-r" />
+            <arg value="ICUConverter.framework" />
+            <arg value="${pandora.frameworks_for_developers.dir}" />
+         </exec>
+         <exec dir="${pandora.application_workingdir}/frameworks"
+              executable="/Applications/Xcode.app/Contents/Developer/Tools/CpMac" failonerror="true">
+            <arg value="-r" />
+            <arg value="ICUData.framework" />
+            <arg value="${pandora.frameworks_for_developers.dir}" />
+         </exec>
+
+   </target>
+
+
+    <target name="compileJavaUnitTest" depends="init, check_debug, createLdbBuildSupportJar">
+        <ant antfile="build.xml" dir="${pandora.application_dir}" target="compileJavaUnitTest"/>
+        <ant antfile="build.xml" dir="${pandora.nestlib_dir}" target="compileJavaUnitTest"/>
+        <ant antfile="build.xml" dir="${pandora.ldb_dir}" target="compileUnitTest"/>
+        <ant antfile="build.xml" dir="${pandora.builder_dir}" target="compileUnitTest"/>
+    </target>
+
+    <target name="buildTools_mac" depends="init" if="pandora.isMac">
+
+      <echo message="xcodebuild_style = ${pandora.xcodebuild_style}"/>
+      <echo message="xcodebuild_debug = ${pandora.xcodebuild_debug}"/>
+        <exec dir="${pandora.builds_dir}/Tools/OSX/MakeRelativeAlias"
+              executable="xcodebuild" failonerror="true">
+            <!-- <arg value="-buildstyle" />
+            <arg value="${pandora.xcodebuild_style}" /> -->
+            <arg value="debug=${pandora.xcodebuild_debug}" />
+        </exec>
+    </target>
+    <target name="buildTools_win" depends="init" if="pandora.isWindows">
+        <!-- No Windows-specific tools to build. -->
+    </target>
+    <target name="buildTools" depends="init, check_debug, buildTools_mac, buildTools_win">
+        <ant antfile="build.xml" dir="${pandora.tools_dir}" target="createTools"/>
+    </target>
+
+    <!-- Collect some files needed for interactive debugging of Pandora by
+         developers, and for the automated testing of Pandora. -->
+
+    <target name="collectLibsForDevelopers" depends="init, collectLibsForDevelopers_Common,   collectLibsForDevelopers_lib10" if="pandora.isMac" />
+	<target name="collectLibsForDevelopers_Common" depends="init" if="pandora.isMac">
+        <mkdir dir="${pandora.libs_for_developers.dir}"/>
+
+        <!-- Clean out old copies of the files that we will copy below.
+             Don't delete the entire directory, because other Ant scripts might
+             have already deposited some files in this directory. -->
+        <!-- First, unlock any locked files (clear the immutable bit). -->
+        <exec dir="${pandora.libs_for_developers.parentdir}"
+              executable="/usr/bin/chflags" failonerror="true">
+            <arg value="-R" />
+            <arg value="nouchg" />
+            <arg value="${pandora.libs_for_developers.dirname}" />
+        </exec>
+        <delete quiet="true">
+            <fileset dir="${pandora.libs_for_developers.dir}">
+                <include name="*.dylib"/>
+                <include name="*.jnilib"/>
+                <include name="iKey API X"/>
+                <include name="Eve3"/>
+            </fileset>
+        </delete>
+        <delete dir="${pandora.frameworks_for_developers.dir}" quiet="yes"/>
+
+
+        <copy tofile="${pandora.libs_for_developers.dir}/libPDFRender.jnilib"
+              file="${pandora.application_nativedir}/PDFRender/OSX/build/libPDFRender.dylib"/>
+  
+       <copy tofile="${pandora.libs_for_developers.dir}/libPDFLibNative.jnilib"
+              file="${pandora.application_nativedir}/PDFLibNative/OSX/build/libPDFLibNative.dylib"/>
+
+        <mkdir dir="${pandora.frameworks_for_developers.dir}"/>
+        <exec dir="${pandora.application_workingdir}/frameworks"
+              executable="/Applications/Xcode.app/Contents/Developer/Tools/CpMac" failonerror="true">
+            <arg value="-r" />
+            <arg value="AdobeACE.framework" />
+            <arg value="${pandora.frameworks_for_developers.dir}" />
+        </exec>
+        <exec dir="${pandora.application_workingdir}/frameworks"
+              executable="/Applications/Xcode.app/Contents/Developer/Tools/CpMac" failonerror="true">
+            <arg value="-r" />
+            <arg value="AdobeAGM.framework" />
+            <arg value="${pandora.frameworks_for_developers.dir}" />
+        </exec>
+        <exec dir="${pandora.application_workingdir}/frameworks"
+              executable="/Applications/Xcode.app/Contents/Developer/Tools/CpMac" failonerror="true">
+            <arg value="-r" />
+            <arg value="AdobeARE.framework" />
+            <arg value="${pandora.frameworks_for_developers.dir}" />
+        </exec>
+        <exec dir="${pandora.application_workingdir}/frameworks"
+              executable="/Applications/Xcode.app/Contents/Developer/Tools/CpMac" failonerror="true">
+            <arg value="-r" />
+            <arg value="AdobeAXE8SharedExpat.framework" />
+            <arg value="${pandora.frameworks_for_developers.dir}" />
+        </exec>
+        <exec dir="${pandora.application_workingdir}/frameworks"
+              executable="/Applications/Xcode.app/Contents/Developer/Tools/CpMac" failonerror="true">
+            <arg value="-r" />
+            <arg value="AdobeBIB.framework" />
+            <arg value="${pandora.frameworks_for_developers.dir}" />
+        </exec>
+        <exec dir="${pandora.application_workingdir}/frameworks"
+              executable="/Applications/Xcode.app/Contents/Developer/Tools/CpMac" failonerror="true">
+            <arg value="-r" />
+            <arg value="AdobeBIBUtils.framework" />
+            <arg value="${pandora.frameworks_for_developers.dir}" />
+        </exec>
+        <exec dir="${pandora.application_workingdir}/frameworks"
+              executable="/Applications/Xcode.app/Contents/Developer/Tools/CpMac" failonerror="true">
+            <arg value="-r" />
+            <arg value="AdobeCoolType.framework" />
+            <arg value="${pandora.frameworks_for_developers.dir}" />
+        </exec>
+        <exec dir="${pandora.application_workingdir}/frameworks"
+              executable="/Applications/Xcode.app/Contents/Developer/Tools/CpMac" failonerror="true">
+            <arg value="-r" />
+            <arg value="AdobeJP2K.framework" />
+            <arg value="${pandora.frameworks_for_developers.dir}" />
+        </exec>
+        <exec dir="${pandora.application_workingdir}/frameworks"
+              executable="/Applications/Xcode.app/Contents/Developer/Tools/CpMac" failonerror="true">
+            <arg value="-r" />
+            <arg value="AdobePDFL.framework" />
+            <arg value="${pandora.frameworks_for_developers.dir}" />
+        </exec>
+        <exec dir="${pandora.application_workingdir}/frameworks"
+              executable="/Applications/Xcode.app/Contents/Developer/Tools/CpMac" failonerror="true">
+            <arg value="-r" />
+            <arg value="AdobeXMP.framework" />
+            <arg value="${pandora.frameworks_for_developers.dir}" />
+        </exec>
+        
+                
+
+        <copy todir="${pandora.libs_for_developers.dir}"
+              file="${pandora.application_nativedir}/MacUtil/libSSiMacUtil.jnilib"/>
+
+        <!--<copy tofile="${pandora.libs_for_developers.dir}/libSSiNestLib.jnilib"
+              file="${pandora.nestlib_nativedir}/OSX/libSSiNestLib.dylib"/> -->
+
+        <copy tofile="${pandora.libs_for_developers.dir}/libcherry.jnilib"
+              file="${pandora.application_pandora_dir}/OSX/jnilib/build/Release/libcherry.dylib"/>
+
+    </target>
+
+    <target name="runAppGuiTests" depends="init, check_debug">
+    		<echo message="***** No action for runAppGuiTests with Whistler"/>
+    		<!--
+        <ant antfile="build.xml" dir="${pandora.test_dir}" target="runAppGuiTests"/>
+        -->
+    </target>
+
+    <target name="rerunAppGuiTests" depends="init, check_debug">
+    		<echo message="***** No action for rerunAppGuiTests with Whistler"/>
+    		<!--
+        <ant antfile="build.xml" dir="${pandora.test_dir}" target="rerunAppGuiTests"/>
+        -->
+    </target>
+
+    <target name="runAppUnitTests" depends="init, check_debug">
+        <ant antfile="build.xml" dir="${pandora.test_dir}" target="runAppUnitTests"/>
+    </target>
+
+    <target name="rerunAppUnitTests" depends="init, check_debug">
+        <ant antfile="build.xml" dir="${pandora.test_dir}" target="rerunAppUnitTests"/>
+    </target>
+
+    <target name="clean_mac" depends="init" if="pandora.isMac">
+        <delete dir="${pandora.builds_dir}/Tools/OSX/MakeRelativeAlias/build" quiet="yes"/>
+
+        <!-- Need to use a defaultexcludes task because the "defaultexcludes"
+             attribute of the delete task is misinterpreted as a deprecated attribute. -->
+        <defaultexcludes remove="**/.DS_Store"/>
+        <delete quiet="true">
+            <fileset dir="${pandora.root_dir}">
+                <include name="**/.DS_Store"/>
+            </fileset>
+        </delete>
+        <defaultexcludes add="**/.DS_Store"/>
+
+        <mkdir dir="${pandora.builds.workdir}"/>
+        <!-- Unlock any locked files (clear the immutable bit) in the working directory. -->
+        <exec dir="${pandora.builds.parent_of_workdir}"
+              executable="/usr/bin/chflags" failonerror="true">
+            <arg value="-R" />
+            <arg value="nouchg" />
+            <arg value="${pandora.builds.workdirname}" />
+        </exec>
+    </target>
+
+    <target name="clean" depends="init, check_debug, clean_mac">
+        <ant antfile="build.xml" dir="${pandora.ldb_dir}" target="clean"/>
+        <ant antfile="build.xml" dir="${pandora.builder_dir}" target="clean"/>
+        <ant antfile="build.xml" dir="${pandora.nestlib_dir}" target="clean"/>
+        <ant antfile="build.xml" dir="${pandora.application_dir}" target="clean"/>
+        <ant antfile="build.xml" dir="${pandora.guitest_dir}" target="clean"/>
+        <ant antfile="build.xml" dir="${pandora.install_dir}" target="clean"/>
+        <ant antfile="build.xml" dir="${pandora.test_dir}" target="clean"/>
+        <ant antfile="build.xml" dir="${pandora.tools_dir}" target="clean"/>
+        <ant antfile="build.xml" dir="${pandora.service_dir}" target="clean"/>
+        <delete dir="${pandora.builds.workdir}" quiet="true"/>
+    </target>
+
+	<target name="cleanExceptForExternal" depends="init, check_debug, clean_mac">
+        <ant antfile="build.xml" dir="${pandora.ldb_dir}" target="clean"/>
+        <ant antfile="build.xml" dir="${pandora.builder_dir}" target="clean"/>
+        <ant antfile="build.xml" dir="${pandora.nestlib_dir}" target="clean"/>
+        <ant antfile="build.xml" dir="${pandora.application_dir}" target="clean"/>
+        <ant antfile="build.xml" dir="${pandora.guitest_dir}" target="clean"/>
+        <ant antfile="build.xml" dir="${pandora.install_dir}" target="clean"/>
+        <ant antfile="build.xml" dir="${pandora.test_dir}" target="clean"/>
+        <ant antfile="build.xml" dir="${pandora.tools_dir}" target="clean"/>
+        <ant antfile="build.xml" dir="${pandora.service_dir}" target="clean"/>
+        <delete dir="${pandora.builds.workdir}" quiet="true"/>
+    </target>
+
+    <!-- Build everything needed for installation, but not the installer itself.
+         (We can't have this target build the installer too, because the collectLibsForDevelopers target
+         defines the pandora.pdflib.collection.dir property one way, but the createInstaller target calls the
+         install/build.xml script which then attempts to define the pandora.pdflib.collection.dir property a
+         different way. This doesn't work, because properties cannot be redefined within a single run of Ant.
+         Therefore the collectLibsForDevelopers target and the createInstaller target cannot both be invoked in
+         the same execution of Ant.) -->
+    <target name="buildAlmostAll" depends="init,  buildApp, createCrcFile, buildTools, collectLibsForDevelopers"/>
+    
+    <target name="buildService" depends="init">
+        <ant antfile="build.xml" dir="${pandora.service_dir}" target="buildService"/>
+    </target>
+    
+    <!-- Build Oracle DB Tool -->
+    <target name="buildDBTool" depends="init">
+        <ant antfile="build.xml" dir="${pandora.service_dir}" target="buildDBTool"/>
+    </target>
+
+<!-- begin: merged from pla162. changelist 269956.  -->
+	<target name="buildPLA_Mac" depends="init" if="pandora.isMac">
+		<delete dir="${PLA.Client.dest_dir}" quiet="yes"/>
+		
+		<exec dir="${pandora.root_dir}" executable="p4" failonerror="true">
+		  <arg line="sync" />
+      <arg line="${PLA.Client.source_dir}/..."/>
+		</exec>
+		
+		<copy todir="${PLA.Client.dest_dir}">
+			<fileset dir="${PLA.Client.source_dir}">
+		  	<include name="**/*.*"/>
+			</fileset>
+		</copy> 
+		
+    <ant antfile="build.xml" dir="${PLA.Client.dest_dir}" target="clean"/>        
+    <ant antfile="build.xml" dir="${PLA.Client.dest_dir}" target="buildAll"/>
+	</target>
+
+	<target name="buildPLA_Win" depends="init" if="pandora.isWindows">
+		<!-- Do not need to copy files  -->
+		<exec dir="${pandora.root_dir}" executable="p4" failonerror="true">
+		  <arg line="sync" />
+      <arg line="${PLA.Client.source_dir}/..."/>
+		</exec>
+		
+		<ant antfile="build.xml" dir="${PLA.Client.source_dir}" target="clean"/>        
+    <ant antfile="build.xml" dir="${PLA.Client.source_dir}" target="buildAll"/>
+	</target>
+
+	<target name="buildPLA" depends="init, buildPLA_Mac, buildPLA_Win">
+	</target>
+	
+	<!-- end: merged from pla162. changelist 269956  -->
+	
+	
+	
+	
+	
+    <!-- =============================== Help =============================== -->
+    <target name="help" depends="init">
+        <echo message=""/>
+        <echo message="Usage: Ant [[target]] /Dname[=|#[{string | number}]]"/>
+				<echo message="-Dmsdev.version=8 will build VC8.0 projects."/>
+				<echo message="-Dmsdev.version=9 will build VC9.0 projects."/>
+				<echo message=" By default ant builds VC7.0 projects."/>
+				<echo message="-Dpandora.enable_debug=true will cause to build the debug version."/>
+				<echo message=""/>
+        <echo message="Ant build targets:"/>
+        <echo message="  buildApp"/>
+        <echo message="  clean"/>
+        <echo message="  buildAlmostAll"/>
+        <echo message="  buildBuilder"/>
+        <echo message="  buildGuiTester"/>
+        <echo message="  buildLocalizer"/>
+        <echo message="  buildCorelib"/>
+        <echo message="  buildSpring"/>
+        <echo message="  buildTools"/>
+        <echo message="  collectLibsForDevelopers (Mac)"/>
+        <echo message="  compileJavaUnitTest"/>
+        <echo message="  createCrcFile (Win)"/>
+        <echo message="  createInstaller"/>
+		<echo message="  createPandoraInstaller"/>
+        <echo message="  createWhistlerInstaller"/> 
+        <echo message="  distributeInstaller"/>
+		<echo message="  distributePandoraInstaller"/>
+        <echo message="  distributeWhistlerInstaller"/>
+        <echo message="  runBuilder"/>
+        <echo message="  runAppGuiTests"/>
+        <echo message="  rerunAppGuiTests"/>
+        <echo message="  runAppUnitTests"/>
+        <echo message="  rerunAppUnitTests"/>
+        <echo message="  buildService"/>
+        <echo message="  buildPLA"/>
+    </target>
+
+</project>

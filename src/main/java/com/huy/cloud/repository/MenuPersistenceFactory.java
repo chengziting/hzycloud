@@ -34,7 +34,7 @@ public class MenuPersistenceFactory {
     private static int  currentId = 1000;
     private static final String MENU_ID_PREFIX = "menu_";
     private static final String MENU_FILE_PATH = "classpath:menu-list.xml";
-    private static final String OUT_MENU_LIST_PATH = "/out/menu-list.xml";
+    private static final String OUT_MENU_LIST_PATH = "/data/menu-list.xml";
 
     private ResourceLoader resourceLoader;
 
@@ -142,7 +142,7 @@ public class MenuPersistenceFactory {
 
     private File getOutFile() throws IOException {
         String homePath = HzyCloudApplication.getHomePath().getPath();
-        String pathStr = homePath + "/out";
+        String pathStr = homePath + "/data";
         Path path = Paths.get(pathStr);
         if(!path.toFile().exists()){
             Files.createDirectory(path);
