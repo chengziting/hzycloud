@@ -23,6 +23,8 @@ import java.util.zip.ZipFile;
 @RequestMapping("/api")
 public class TestController {
 
+    public static final String PROJECT_JAR_NAME = "hzy-cloud-0.0.1-SNAPSHOT.jar";
+
     @RequestMapping("/downloadCode")
     public String downloadCode(HttpServletRequest request,HttpServletResponse response) {
         try {
@@ -121,8 +123,10 @@ public class TestController {
 
         String projectRoot = HzyCloudApplication.getHomePath().getPath() + "/data/hzycloud-master/";
 //        Runtime.getRuntime().exec(new String[]{"cmd","ant"});
-        Process process = Runtime.getRuntime().exec(new String[] {"cmd", "/K", "Start","ant"});
-
+        Runtime runtime = Runtime.getRuntime();
+        String cmdStr = String.format("cmd /k cd %s && mvn package",projectRoot);
+//        Process process = runtime.exec(new String[] {"cmd", "/K", "Start","mvn",projectRoot+"pom.xml","package"});
+        runtime.exec(cmdStr);
         System.out.println();
     }
 }

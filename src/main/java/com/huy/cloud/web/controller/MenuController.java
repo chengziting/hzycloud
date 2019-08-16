@@ -4,6 +4,7 @@ import com.huy.cloud.model.MenuModel;
 import com.huy.cloud.repository.MenuPersistenceFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,9 +22,18 @@ public class MenuController {
     @Autowired
     private MenuPersistenceFactory menuRepo;
     @RequestMapping("/menu/list")
-    @ResponseBody
-    public List<MenuModel> getMenu(){
+//    @ResponseBody
+    public String getMenu(Model model){
         List<MenuModel> list = menuRepo.getMenuList();
+        model.addAttribute("list",list);
+        return "/menu/list";
+    }
+
+    @RequestMapping("/api/menu/list")
+    @ResponseBody
+    public List<MenuModel> getMenuJson(){
+        List<MenuModel> list = menuRepo.getMenuList();
+
         return list;
     }
 
