@@ -54,5 +54,11 @@ public class MenuController {
 
     }
 
+    @RequestMapping("/")
+    public String index(){
+
+        return "/menu/index";
+    }
+
 
 }
